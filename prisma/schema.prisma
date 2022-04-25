@@ -1,0 +1,64 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider          = "postgresql"
+  url               = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+}
+
+model users {
+  id            Int     @id @default(autoincrement())
+  email         String  @unique
+  password_hash String?
+  password      String
+}
+
+model categories {
+  id    Int     @id @default(autoincrement())
+  name  String
+  tests tests[]
+}
+
+model tests {
+  id                    Int                 @id @default(autoincrement())
+  name                  String
+  pdfUrl                String              @unique
+  categoryId            categories          @relation(references: [id], fields: [categoriesId])
+  categoriesId          Int                 @unique
+  teacherDisciplineId   teachersDisciplines @relation(references: [id], fields: [teachersDisciplinesId])
+  teachersDisciplinesId Int                 @unique
+}
+
+model teachers {
+  id                  Int                   @id @default(autoincrement())
+  name                String
+  teachersDisciplines teachersDisciplines[]
+}
+
+model teachersDisciplines {
+  id            Int         @id @default(autoincrement())
+  teacherId     teachers    @relation(references: [id], fields: [teachersId])
+  teachersId    Int         @unique
+  disciplineId  disciplines @relation(references: [id], fields: [disciplinesId])
+  disciplinesId Int         @unique
+  tests         tests[]
+}
+
+model disciplines {
+  id                  Int                   @id @default(autoincrement())
+  name                String
+  termId              terms                 @relation(references: [id], fields: [termsId])
+  termsId             Int                   @unique
+  teachersDisciplines teachersDisciplines[]
+}
+
+model terms {
+  id          Int           @id @default(autoincrement())
+  number      Int
+  disciplines disciplines[]
+}
