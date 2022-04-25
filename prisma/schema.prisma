@@ -12,10 +12,9 @@ datasource db {
 }
 
 model users {
-  id            Int     @id @default(autoincrement())
-  email         String  @unique
-  password_hash String?
-  password      String
+  id       Int    @id @default(autoincrement())
+  email    String @unique
+  password String
 }
 
 model categories {
