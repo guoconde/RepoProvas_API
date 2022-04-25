@@ -1,3 +1,4 @@
+import { users } from '@prisma/client';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import prisma from '../db.js';
@@ -10,7 +11,8 @@ async function findUser(email: string) {
   return user;
 }
 
-async function login(data) {
+export type UserData = Omit<users, 'id'>
+async function login(data: UserData) {
   const { email, password } = data;
   const user = await findUser(email);
 
@@ -30,7 +32,24 @@ async function login(data) {
   return token;
 }
 
+async function insert(data: UserData) {
+  const userData = data;
+  const { password } = userData;
+
+  const userExits = findUser(userData.email);
+  if (!userExits) throw { type: 'conflict', message: 'Email already registered.' };
+
+  const hashedPassword = bcrypt.hashSync(password, 8);
+
+  await prisma.users.create({
+    data: {
+      ...userData,
+      password: hashedPassword,
+    },
+  });
+}
+
 export default {
-  findUser,
   login,
+  insert,
 };
